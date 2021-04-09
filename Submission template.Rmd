@@ -1,0 +1,39 @@
+---
+header-includes:
+   - \usepackage{bm}
+   - \usepackage{float}
+   - \floatplacement{figure}{H}
+   - \usepackage{booktabs}
+   - \usepackage{sectsty} \sectionfont{\centering \emph}
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+ 
+---
+\newcommand\btheta{\mbox{\boldmath${\theta}$}}
+
+```{r setup, include=FALSE}
+# Use echo = FALSE for Answer Key without R code, 
+# echo = TRUE for complete solutions.
+knitr::opts_chunk$set(echo = TRUE)
+library(plyr)
+library("tidyverse")
+library("xtable")
+library("Rcpp")
+library("plyr")
+library("knitr")
+```
+
+Team No: 202
+
+Track No.: 2. 
+
+# Our name of the project
+
+Link to GitHub Repository: https://github.com/MantautasRimkus/StanfordDatathonCSU
+
+
+### Introduction 
+
+
