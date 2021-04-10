@@ -34,6 +34,23 @@ Track No.: 2.
 Link to GitHub Repository: https://github.com/MantautasRimkus/StanfordDatathonCSU
 
 
-### Introduction 
+### Plan
+
+* Write introduction: About Covid, about anxiety, about how 19-28 more(no more?) prone to it. Write that our analysis shows that a lot of 18-29 are in the college. 
+
+* Write introduction: calculate (using historical data) how many 18-29 is in college. Maybe prediction for 2020. 
+* Describe data sources used in this research:
+   - Anxiety
+   - Covid
+   - Google
+
+* Overview trends in anxiety data (functional analysis)
+
+* Panel modelling 
+
+* Discussion/results. 
+
+
+
 
 
