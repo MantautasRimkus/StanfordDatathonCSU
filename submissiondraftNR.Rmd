@@ -1,0 +1,35 @@
+title: 'Draft of Report for Datathon'
+author: "Nathan Ryder Mantautas Rimkus, Paul Chong, Ian Taylor"
+date: '`r format(Sys.time(), "%d %B %Y")`'
+output:
+  bookdown::html_document2: 
+    number_sections: true
+    toc: yes
+
+header-includes:
+  - \usepackage{amsmath}
+  - \usepackage{enumerate}
+  - \usepackage{booktabs}
+---
+
+
+# Introduction
+
+University students have been found to experience mental health disorders at a disproportionate rate.  One meta-analysis found the average rate of depression in university students to be 30.6\%, when the general US population is estimated to have a 9\% average rate (REF).  The age range of most university students, 18-22, is host to large social and mental developments and is one of the more common time periods for mental disorders like anxiety to manifest (REF).  Adding the pressures of school and high-impact life choices, it is understandable that university students experience more than their fair share of mental health issues.  
+
+The year 2020 and the disease Covid-19 added further difficulty to the lives of those who are college aged.  Students who returned or were admitted to universities in fall 2020 were forced to learn new styles of learning and make sacrifices in their social lives.   Universities transitioned to partially or fully online curriculum, adding distance between student and staff communities.  Unsurprisingly, measures for anxiety and depression have increased under the duration of the Covid-19 pandemic.  This report examines the survey-reported changes in anxiety or depression prevalence for college-aged persons in the United States.  Data on Covid-19 infection rates are linked with the mental health surveys.  
+
+# Data
+
+
+
+
+
+
+
+
+Figures:
+
+plot of age groups anxiety
+
+plot of covid?
