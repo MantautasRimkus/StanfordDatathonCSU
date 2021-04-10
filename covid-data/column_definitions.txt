@@ -1,0 +1,15 @@
+submission_date	=	Date of counts
+state		=	Jurisdiction
+tot_cases	=	Total number of cases
+conf_cases	=	Total confirmed cases
+prob_cases	=	Total probable cases
+new_case	=	Number of new cases
+pnew_case	=	Number of new probable cases
+tot_death	=	Total number of deaths
+conf_death	=	Total number of confirmed deaths
+prob_death	=	Total number of probable deaths
+new_death	=	Number of new deaths
+pnew_death	=	Number of new probable deaths
+created_at	=	Date and time record was created
+consent_cases	=	If Agree, then confirmed and probable cases are included. If Not Agree, then only total cases are included.
+consent_deaths	=	If Agree, then confirmed and probable deaths are included. If Not Agree, then only total deaths are included.
