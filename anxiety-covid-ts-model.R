@@ -1,12 +1,24 @@
 # This file runs a time series model for anxiety of 18-29 year olds with
 # covid cases as a predictor
 
+dplyr
 library(plm)
 
 # Read in anxiety data, covid data (whole US) and covid data (by state)
 anxiety <- read.csv("anx_rate_ext.csv")
 covid.us <- read.csv("covid-data/weekly-us.csv")
 covid <- read.csv("covid-data/weekly-states.csv")
+search <- read.csv("statetrends.csv")
+
+########## Add diffs to search data
+`%>%` <- dplyr::`%>%`
+search <- search %>%
+  dplyr::arrange(location, date_end) %>%
+  dplyr::group_by(location) %>%
+  dplyr::mutate(
+    diff = hits - dplyr::lag(hits),
+    logratio = log(hits / dplyr::lag(hits))
+  )
 
 # Join together data sources into data frame for linear model
 dates <- anx$date_end
@@ -81,6 +93,20 @@ for (i in 1:nrow(paneldata)) {
   if (d %in% anxiety$date_end) {
     paneldata[i,"anx"] <- anxiety[anxiety$date_end == d, s]
   }
+  if (d %in% search$date_end) {
+    paneldata[i,"search"] <- search[
+      (search$State == s) & (search$date_end == d),
+      "hits"
+    ]
+    paneldata[i,"searchdiff"] <- search[
+      (search$State == s) & (search$date_end == d),
+      "diff"
+    ]
+    paneldata[i,"searchlogratio"] <- search[
+      (search$State == s) & (search$date_end == d),
+      "logratio"
+    ]
+  }
 }
 
 paneldata <- paneldata[paneldata$Date %in% dates,] # Only dates with an anxiety measurement
@@ -95,3 +121,15 @@ fit.states.random <- plm(anx ~ LogCasesRatio + lag(anx), paneldata,
 summary(fit.states.random)
 
 phtest(fit.states.fixed, fit.states.random)
+
+
+# Model: panel model by state with anxiety as response regressed on covid SEARCHES
+fit.states.search.fixed <- plm(anx ~ searchlogratio + lag(anx), paneldata, 
+                        index=c("State", "Date"), model="within")
+summary(fit.states.search.fixed)
+
+fit.states.search.random <- plm(anx ~ searchlogratio + lag(anx), paneldata, 
+                         index=c("State", "Date"), model="random")
+summary(fit.states.search.random)
+
+phtest(fit.states.search.fixed, fit.states.search.random)
