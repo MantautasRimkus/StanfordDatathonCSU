@@ -1,5 +1,6 @@
+---
 title: 'Draft of Report for Datathon'
-author: "Nathan Ryder Mantautas Rimkus, Paul Chong, Ian Taylor"
+author: "Mantautas Rimkus, Paul Chong, Nathan Ryder, Ian Taylor"
 date: '`r format(Sys.time(), "%d %B %Y")`'
 output:
   bookdown::html_document2: 
@@ -12,16 +13,64 @@ header-includes:
   - \usepackage{booktabs}
 ---
 
+```{r setup, include=F}
+library(knitr)
+library(tidyverse)
+library(ggplot2)
+library(gridExtra)
+library(lubridate)
+library(maps)
+
+
+## hide/show code
+show <- FALSE
+cac <- FALSE
+cvhei <- 7.5
+monhei <- 5
+cacpath <- "/home/nthnrydr/research_local/rmd_caches/dat_analysis_2011/"
+
+options(knitr.kable.NA = '')
+knitr::opts_chunk$set(cache.path = cacpath,
+                      cache = cac,
+                      fig.height=3.5, fig.width=5, fig.pos = "Ht",
+                      fig.path = "/home/nthnrydr/research_local/figures/",
+                      echo = show)
+                      ## base.dir = "/home/nthnrydr/research_local/rmd/dat_analysis_2011_base/",
+                      
+```
+
 
 # Introduction
 
 University students have been found to experience mental health disorders at a disproportionate rate.  One meta-analysis found the average rate of depression in university students to be 30.6\%, when the general US population is estimated to have a 9\% average rate (REF).  The age range of most university students, 18-22, is host to large social and mental developments and is one of the more common time periods for mental disorders like anxiety to manifest (REF).  Adding the pressures of school and high-impact life choices, it is understandable that university students experience more than their fair share of mental health issues.  
 
-The year 2020 and the disease Covid-19 added further difficulty to the lives of those who are college aged.  Students who returned or were admitted to universities in fall 2020 were forced to learn new styles of learning and make sacrifices in their social lives.   Universities transitioned to partially or fully online curriculum, adding distance between student and staff communities.  Unsurprisingly, measures for anxiety and depression have increased under the duration of the Covid-19 pandemic.  This report examines the survey-reported changes in anxiety or depression prevalence for college-aged persons in the United States.  Data on Covid-19 infection rates are linked with the mental health surveys.  
+The year 2020 and the disease Covid-19 added further difficulty to the lives of those who are college aged.  Students who returned or were admitted to universities in fall 2020 were forced to learn new styles of learning and make sacrifices in their social lives.   Universities transitioned to partially or fully online curriculum, adding distance between student and staff communities.  Unsurprisingly, measures for anxiety have increased under the duration of the Covid-19 pandemic.  This report examines the survey-reported changes in anxiety for college-aged persons in the United States. Data on Covid-19 infection rates are linked with the mental health surveys via a fixed effects model.  Google search trends are also tested for correlations with weekly anxiety measures.
 
 # Data
 
+The US Household Pulse Survey began in April 2020 as an attempt to monitor potential effects of the Covid pandemic on the US population.  The survey asked questions on education, employment, food security, health, and other household characteristics that may be susceptible to change during a health emergency.  There have been three phases to the survey, spanning from April 2020 to March 2021 with semi-weekly data available.  For this study, Table 2a: "Symptoms of Anxiety Experienced in the Last 7 Days, by Select Characteristics" was gathered for each week of the survey.  This table tracked the frequency that anxiety was experienced for the survey week, subjects responded with either "Not at all", "Several days", "More than half the days", or "Nearly every day".   Additional variables, such as age, sex, race, education, etc. were recorded, and the survey results were split into the 50 states as well as overall US .
 
+The anxiety survey data posed a few difficulties.  First, the survey "weeks" were at irregular intervals and an inconsistent number of days.  For example, the first survey "week" occurred between April 23 and May 5.  Second, the survey method used the Census Bureau's Master Address File to send emails and texts to very large samples.  This method had high non-response rates and is likely subject to considerable bias, although this is a common feature of any survey data.  Third, the age ranges recorded in this survey begin with "18-29".  To demonstrate that this age range is highly relevant to university administration, data was obtained from the National Center for Education Statistics. Figure \@ref(fig:univpop) shows that ~30\% of 18-29 year-olds in the United States are in higher education and that of those in higher education in the US, ~75\% are between the ages 18 and 29.  Thus the mental health characteristics of the age bracket 18-29 are will apply to the vast majority of university students.
+
+
+```{r, univpop, fig.cap = "The proportion of US higher education students who are between ages 18-29 (blue) and the proportion of US 18-29 year olds who are in higher education (red)."}
+ college_pop <- read.csv("~/Dropbox/Datathon/StanfordDatathonCSU/college_population_data.csv")
+ total_pop <- read.csv("~/Dropbox/Datathon/StanfordDatathonCSU//18-29_population_data.csv") %>%
+     mutate(Year = Year..August.) %>%
+     filter(Year < 2019)
+
+ ggplot(college_pop, aes(x = Year)) +
+     geom_line(aes(y = college_pop$Porportion.Inside, color = "blue")) +
+     geom_point(aes(y = college_pop$Porportion.Inside, color = "blue"))+
+     geom_line(data = total_pop, aes(y = total_pop$Proportion, color = "red")) +
+     geom_point(data = total_pop, aes(y = total_pop$Proportion, color = "red"))+
+     scale_y_continuous(breaks = c(0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.00), 
+                        limits = c(0,1)) +
+     labs(x = "Year", y = "Proportion", colour = "Age Groups") +
+     theme_bw() +
+     theme(legend.position = "none")
+ ```
+ 
 
 
 
@@ -29,6 +78,10 @@ The year 2020 and the disease Covid-19 added further difficulty to the lives of 
 
 
 Figures:
+
+weeks
+
+
 
 plot of age groups anxiety
 
