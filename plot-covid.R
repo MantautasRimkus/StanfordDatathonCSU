@@ -57,3 +57,11 @@ covid.us.weekly$LogRatio <- replace(covid.us.weekly$LogRatio, is.infinite(covid.
 
 
 ggplot(covid.us.weekly, aes(x=EndofWeek, y=LogRatio)) + geom_line()
+
+##############################################################################
+
+# output files after processing
+
+write.csv(covid.weekly, "covid-data/weekly-states.csv")
+
+write.csv(covid.us.weekly, "covid-data/weekly-us.csv")
