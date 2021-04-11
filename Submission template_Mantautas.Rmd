@@ -1,0 +1,101 @@
+---
+header-includes:
+   - \usepackage{bm}
+   - \usepackage{float}
+   - \floatplacement{figure}{H}
+   - \usepackage{booktabs}
+   - \usepackage{sectsty} \sectionfont{\centering \emph}
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+ 
+---
+\newcommand\btheta{\mbox{\boldmath${\theta}$}}
+
+```{r setup, include=FALSE}
+# Use echo = FALSE for Answer Key without R code, 
+# echo = TRUE for complete solutions.
+knitr::opts_chunk$set(echo = TRUE)
+library(plyr)
+library("tidyverse")
+library("xtable")
+library("Rcpp")
+library("plyr")
+library("knitr")
+library("gghighlight")
+```
+
+Team No: 202
+
+Track No.: 2. 
+
+# Our name of the project
+
+Link to GitHub Repository: https://github.com/MantautasRimkus/StanfordDatathonCSU
+
+
+### Plan
+
+#Data extrapolation 
+
+As described before, the data from Household Pulse Survey is named by weeks. As it is described in the technical documentation (LINK), these weeks do not represent the actual interval of 7 days. For example, "Week 1" refers to data that was collected between April 23, 2020, to May 5, 2020, (13 days interval), but Week 9 refers to data that was collected between June 25, 2020, to June 30, 2020 (6 days interval). Thus time points $s_i$ refers to the end date of each Week collection. 
+
+Notice that $s_i$ is sparse and leads to unequal spaces between data points. Thus to ensure univariate differences between time points (to be able to implement the models described later), we used interpolation, where our new time points $t_1,\ldots,t_{47}$ represents Sundays between May 05, 2020, to March 29, 2021. To calculated some data point $X_{t_i}$, where $s_{j-1}<t_i\leq s_{j}$:
+
+$$
+X_{t_i}=\frac{d(s_{j-1},t_i)}{d(s_{j-1},s_{j})}X_{s_j} + \frac{d(t_i,s_{j})}{d(s_{j-1},s_{j})}X_{s_{j-1}}
+$$
+
+An example of raw data $X_{s_1},\ldots,X_{s_27}$ and interpolated data $X_{t_1},\ldots, X_{t_j}$ interpolation of anxiety ratio for Colorado is given below. 
+
+```{r,fig.cap="Anxiety Ratio in Colorado. Black - original data points, Red = interpolated data with equal time spaces", }
+data_raw <- read.csv("anx_Data_estimates.csv")
+data_inter <- read.csv("anx_rate_ext.csv")
+
+data_raw %>%
+  dplyr::filter(State %in% c("CO")) %>%
+  dplyr::filter(Age %in% c("18 - 29")) %>%
+  dplyr::select(State,date_end,Response) %>%
+  ggplot(aes(x=as.Date(date_end),y=Response)) +
+  geom_line() +
+  geom_point() +
+  geom_line(data=data_inter[,c(2,8)],aes(x=as.Date(date_end),y=CO),col="red") +         geom_point(data=data_inter[,c(2,8)],aes(x=as.Date(date_end), y=CO),col="red") + 
+   theme_bw() +
+   ylab("Anxiety ratio") +
+   xlab("Date")
+```
+
+The plot for anxiety ratio for all states with emphasis for Colorado and California
+
+```{r}
+data_inter[,-1] %>%
+   tidyr::gather("State","Value",-date_end) %>%
+   dplyr::filter(!State=="US") %>%
+   ggplot(aes(x=as.Date(date_end),y=Value,col=State)) +
+   geom_line() +
+   gghighlight(State %in% c("CO","CA")) +
+   theme_bw() +
+   ylab("Anxiety ratio") +
+   xlab("Date")
+
+data_inter[,-1] %>%
+   tidyr::gather("State","Value",-date_end) %>%
+   dplyr::filter(!State=="US") %>%
+   group_by(date_end) %>%
+   dplyr::summarise(mean=mean(Value), sd=sd(Value)) %>%
+   tidyr::gather("Statistics","Value",-date_end) %>%
+   ggplot(aes(x=as.Date(date_end),y=Value,group=Statistics))+
+   geom_line()+
+   facet_wrap(~Statistics) +
+   theme_bw()
+```
+
+```{r}
+require(rmgarch)
+
+
+
+````
+
+
