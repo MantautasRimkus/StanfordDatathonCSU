@@ -1,5 +1,5 @@
 ---
-title: 'Draft of Report for Datathon'
+title: Title
 author: "Mantautas Rimkus, Paul Chong, Nathan Ryder, Ian Taylor"
 date: '`r format(Sys.time(), "%d %B %Y")`'
 output:
@@ -17,7 +17,10 @@ header-includes:
 library(knitr)
 library(tidyverse)
 library(ggplot2)
+library(gghighlight)
 library(gridExtra)
+library(plm)
+library(gtrendsR)
 library(lubridate)
 library(maps)
 
@@ -36,26 +39,37 @@ knitr::opts_chunk$set(cache.path = cacpath,
                       fig.path = "/home/nthnrydr/research_local/figures/",
                       echo = show)
                       ## base.dir = "/home/nthnrydr/research_local/rmd/dat_analysis_2011_base/",
-                      
+
+
+## file location prefix
+datadir <- "/home/nthnrydr/Dropbox/Datathon/StanfordDatathonCSU/"
 ```
+Team No: 202
+
+Track No.: 2. 
+
+
+Link to GitHub Repository: https://github.com/MantautasRimkus/StanfordDatathonCSU
+
+
 
 
 # Introduction
 
-University students have been found to experience mental health disorders at a disproportionate rate.  One meta-analysis found the average rate of depression in university students to be 30.6\%, when the general US population is estimated to have a 9\% average rate (REF).  The age range of most university students, 18-22, is host to large social and mental developments and is one of the more common time periods for mental disorders like anxiety to manifest (REF).  Adding the pressures of school and high-impact life choices, it is understandable that university students experience more than their fair share of mental health issues.  
+University students have been found to experience mental health disorders at a disproportionate rate.  One meta-analysis found the average rate of depression in university students to be 30.6\%, when the general US population is estimated to have a 9\% average rate \textbf{REF}.  The age range of most university students, 18-22, is host to large social and mental developments and is one of the more common time periods for mental disorders like anxiety to manifest \textbf{REF}.  Adding the pressures of school and high-impact life choices, it is understandable that university students experience more than their fair share of mental health issues.  
 
 The year 2020 and the disease Covid-19 added further difficulty to the lives of those who are college aged.  Students who returned or were admitted to universities in fall 2020 were forced to learn new styles of learning and make sacrifices in their social lives.   Universities transitioned to partially or fully online curriculum, adding distance between student and staff communities.  Unsurprisingly, measures for anxiety have increased under the duration of the Covid-19 pandemic.  This report examines the survey-reported changes in anxiety for college-aged persons in the United States. Data on Covid-19 infection rates are linked with the mental health surveys via a fixed effects model.  Google search trends are also tested for correlations with weekly anxiety measures.
 
 # Data
 
-The US Household Pulse Survey began in April 2020 as an attempt to monitor potential effects of the Covid pandemic on the US population.  The survey asked questions on education, employment, food security, health, and other household characteristics that may be susceptible to change during a health emergency.  There have been three phases to the survey, spanning from April 2020 to March 2021 with semi-weekly data available.  For this study, Table 2a: "Symptoms of Anxiety Experienced in the Last 7 Days, by Select Characteristics" was gathered for each week of the survey.  This table tracked the frequency that anxiety was experienced for the survey week, subjects responded with either "Not at all", "Several days", "More than half the days", or "Nearly every day".   Additional variables, such as age, sex, race, education, etc. were recorded, and the survey results were split into the 50 states as well as overall US .
+The \textbf{REF} US Household Pulse Survey began in April 2020 as an attempt to monitor potential effects of the Covid pandemic on the US population.  The survey asked questions on education, employment, food security, health, and other household characteristics that may be susceptible to change during a health emergency.  There have been three phases to the survey, spanning from April 2020 to March 2021 with semi-weekly data available.  For this study, Table 2a: "Symptoms of Anxiety Experienced in the Last 7 Days, by Select Characteristics" was gathered for each week of the survey.  This table tracked the frequency that anxiety was experienced for the survey week, subjects responded with either "Not at all", "Several days", "More than half the days", or "Nearly every day".   Additional variables, such as age, sex, race, education, etc. were recorded, and the survey results were split into the 50 states as well as overall US .
 
-The anxiety survey data posed a few difficulties.  First, the survey "weeks" were at irregular intervals and an inconsistent number of days.  For example, the first survey "week" occurred between April 23 and May 5.  Second, the survey method used the Census Bureau's Master Address File to send emails and texts to very large samples.  This method had high non-response rates and is likely subject to considerable bias, although this is a common feature of any survey data.  Third, the age ranges recorded in this survey begin with "18-29".  To demonstrate that this age range is highly relevant to university administration, data was obtained from the National Center for Education Statistics. Figure \@ref(fig:univpop) shows that ~30\% of 18-29 year-olds in the United States are in higher education and that of those in higher education in the US, ~75\% are between the ages 18 and 29.  Thus the mental health characteristics of the age bracket 18-29 are will apply to the vast majority of university students.
+The anxiety survey data posed a few difficulties.  First, the survey "weeks" were at irregular intervals and an inconsistent number of days.  The irregularity of the intervals can be seen by some gaps in observations in Figure \@ref{fig:usanx}.  Second, the survey method used the Census Bureau's Master Address File to send emails and texts to very large samples.  This method had high non-response rates and is likely subject to considerable bias, although this is a common feature of any survey data.  Third, the age ranges recorded in this survey begin with "18-29".  To demonstrate that this age range is highly relevant to university administration, data was obtained from the National Center for Education Statistics \textbf{REF}. Figure \@ref(fig:univpop) shows that ~30\% of 18-29 year-olds in the United States are in higher education and that of those in higher education in the US, ~75\% are between the ages 18 and 29.  Thus the mental health characteristics of the age bracket 18-29 are will apply to the vast majority of university students.
 
 
 ```{r, univpop, fig.cap = "The proportion of US higher education students who are between ages 18-29 (blue) and the proportion of US 18-29 year olds who are in higher education (red)."}
- college_pop <- read.csv("~/Dropbox/Datathon/StanfordDatathonCSU/college_population_data.csv")
- total_pop <- read.csv("~/Dropbox/Datathon/StanfordDatathonCSU//18-29_population_data.csv") %>%
+ college_pop <- read.csv(paste0(datadir, "college_population_data.csv"))
+ total_pop <- read.csv(paste0(datadir, "18-29_population_data.csv")) %>%
      mutate(Year = Year..August.) %>%
      filter(Year < 2019)
 
@@ -71,6 +85,210 @@ The anxiety survey data posed a few difficulties.  First, the survey "weeks" wer
      theme(legend.position = "none")
  ```
  
+To make a single value metric for anxiety levels, the survey estimates for the last two responses in the survey ("More than half the days" and "Nearly every day") were summed and divided by the sum of the first two responses("Not at all" and "Several days").  The resulting metric is the ratio of survey respondents who felt anxious more than half the time divided by respondents who felt anxious less than half the time.  Furthermore, the anxiety survey data came with standard error estimates for each response.  Using error propagation formulas as in \textbf{REF}, upper-bound standard error estimates could be produced.  Figure \@ref(fig:usanx) shows the anxiety ratio metric for 18-29 year-olds  plotted over the survey period.
+
+```{r, usanx, fig.cap="Anxiety ratio (more than half the time)/(less than half the time) of 18-29 year-olds plotted over survey period with standard error estimates at each observation."}
+## read in surveyed anxiety estimates and errors
+anx_est <- read.csv(paste0(datadir, "anx_Data_estimates.csv"))
+anx_err <- read.csv(paste0(datadir, "anx_Data_error.csv"))
+
+## make correlations to be used in std error estimates
+anx_est <- anx_est %>%
+    group_by(State) %>%
+    mutate(corMoreNearly = cor(More.than.half.the.days, Nearly.every.day),
+           corNotSeveral = cor(Not.at.all, Several.days)) %>%
+    ungroup()
+
+## make std error estimate (should be overestimate since this doesn't include covariance terms that would be subtracted)
+anx_err <- anx_err %>%
+    mutate(Response =  anx_est$Response * sqrt(
+    (More.than.half.the.days^2 + 2*Nearly.every.day*More.than.half.the.days*anx_est$corMoreNearly + Nearly.every.day^2)/(anx_est$More.than.half.the.days + anx_est$Nearly.every.day)^2 + 
+    (Several.days^2 + 2*Several.days*Not.at.all*anx_est$corNotSeveral + Not.at.all^2)/(anx_est$Several.days + anx_est$Not.at.all)^2)) %>%
+    mutate(Upper = anx_est$Response + Response, 
+           Lower = anx_est$Response - Response)
+
+
+## plot us overall with std error bars
+age <- "18 - 29"
+state <- "US"
+ggplot(filter(anx_est, State == state & Age == age),
+       aes(x = as.Date(date_end), y = Response)) +
+    geom_line(alpha = .8) +
+    geom_errorbar(aes(ymax = Upper, ymin = Lower), alpha = .7,
+                  data = filter(anx_err, State == state & Age == age)) +
+    theme_bw() +
+    xlab("") +
+    ylab("Anxiety Ratio") +
+    scale_y_continuous(limits = c(.4, 1.2))
+```
+
+The Household Pulse Survey occurred in three phases, which can be seen in Figure \@ref(fig:usanx) as gaps in observed time points.  The anxiety ratio for 18-29 year-olds had an overall upwards trend for the year period, and the jumps in summer and winter may be related to spikes in Covid infections.  In November 2020 a large increase in anxiety can be easily related to the 2020 presidential election.  
+
+As described in the technical documentation (LINK), the weeks of the Household Pulse Survey do not represent strict intervals of 7 days. For example, "Week 1" refers to data that was collected between April 23rd and May 5th, 2020, (13 days), but Week 9 refers to data that was collected between June 25th and June 30th, 2020 (6 days). The time points $s_i$ will be defined as the end date of each Week collection. 
+
+Notice that the $s_i$ are sparse and lead to unequal spaces between data points. To ensure univariate differences between time points, and be able to implement the models described later, interpolation was used with new time points $t_1,\ldots,t_{47}$ representing Sundays between May 05, 2020, and March 29, 2021. To calculate each $X_{t_i}$, where $s_{j-1}<t_i\leq s_{j}$ the formula :
+
+$$
+X_{t_i}=\frac{d(s_{j-1},t_i)}{d(s_{j-1},s_{j})}X_{s_j} + \frac{d(t_i,s_{j})}{d(s_{j-1},s_{j})}X_{s_{j-1}} \text{ was used.}
+$$
+
+Figure \@ref(fig:coanx) depicts raw data $X_{s_1},\ldots,X_{s_27}$ and interpolated data $X_{t_1},\ldots, X_{t_j}$ for anxiety ratios in Colorado. Figure \@ref(fig:statanx) shows the interpolated anxiety ratios for all states with Colorado and California emphasized.
+
+
+```{r, coanx, fig.cap="Anxiety Ratio in Colorado. Black - original data points, Red - interpolated data with equal time spaces", message=FALSE }
+data_raw <- read.csv(paste0(datadir, "anx_Data_estimates.csv"))
+data_inter <- read.csv(paste0(datadir, "anx_rate_ext.csv"))
+
+data_raw %>%
+  dplyr::filter(State %in% c("CO")) %>%
+  dplyr::filter(Age %in% c("18 - 29")) %>%
+  dplyr::select(State,date_end,Response) %>%
+  ggplot(aes(x=as.Date(date_end),y=Response)) +
+  geom_line() +
+  geom_point() +
+  geom_line(data=data_inter[,c(2,8)],aes(x=as.Date(date_end),y=CO),col="red") +         geom_point(data=data_inter[,c(2,8)],aes(x=as.Date(date_end), y=CO),col="red") + 
+   theme_bw() +
+   ylab("Anxiety ratio") +
+   xlab("Date")
+```
+
+```{r, statanx, fig.cap="Interpolated anxiety ratios for all states with emphasis for Colorado and California", message=FALSE, warning=FALSE}
+data_inter[,-1] %>%
+   tidyr::gather("State","Value",-date_end) %>%
+   dplyr::filter(!State=="US") %>%
+   ggplot(aes(x=as.Date(date_end),y=Value,col=State)) +
+   geom_line() +
+   gghighlight(State %in% c("CO","CA")) +
+   theme_bw() +
+   ylab("Anxiety ratio") +
+   xlab("Date")
+``` 
+
+# Modeling
+
+## Predicting Anxiety from COVID Cases Using a Panel Model
+
+We are searching for a way for school administrators to anticipate increased anxiety among their students. In 2020 and today, anecdotally, COVID is a significant source of anxiety. We used a panel model to find the predictiveness of covid cases on anxiety in 18-29 year olds.
+
+Panel models are used for regression when the response and predictor variables are longitudinal. In this case, we treat US states as entities and have longitudinal values for both anxiety and new COVID cases.
+
+
+For states $s=1,\dots, 50$ and time periods $t=1,\dots,T$, we use the model
+
+$$
+\mbox{anx}_{s,t} = \alpha_s + \beta_1 \mbox{anx}_{s,t-1} + \beta_2 \mbox{COVID}_{s,t} + \varepsilon_{s,t}
+$$
+
+This model allows for state-specific intercepts ($\alpha_s$), autocorrelation in anxiety within a state ($\beta_1$), and an effect of COVID cases on anxiety ($\beta_1$).
+
+Alternatively, we can have a random effect for the state-specific intercepts,
+\begin{align*}
+\mbox{anx}_{s,t} &= \alpha + a_s + \beta_1 \mbox{anx}_{s,t-1} + \beta_2 \mbox{COVID}_{s,t} + \varepsilon_{s,t} \\
+a_s &\sim N(0, \sigma^2_a)
+\end{align*}
+
+The `plm` package in `R` allows us to fit both of these models and perform a hypothesis test to determine which fits our data better.
+
+Because COVID cases can vary largely by state due to the size of the state, we were careful in how we constructed the $\mbox{COVID}_{s,t}$ covariate. We used the log ratio of new cases in sequential weeks as the COVID covariate:
+$$\mbox{COVID}_{s,t} = \log\left(\frac{\text{New cases in state $s$ and week $t$}}{\text{New cases in state $s$ and week $t-1$}}\right).$$
+
+This value is appealing for three reasons. First, it places all states on the same scale by only considering the ratio of subsequent weeks. Second, by using a ratio of new covid cases it handles the exponential growth nature of the pandemic. And third, it works well with an autoregressive model. A positive value means the pandemic is currently accelerating in a state, possibly resulting in increasing anxiety relative to week $t-1$. Similarly, a negative value means the pandemic is slowing down, possibly resulting in decreasing anxiety relative to week $t-1$.
+
+
+### Results
+
+```{r getmodeldata, include=FALSE, eval=FALSE}
+library(plm)
+
+# Read in anxiety data, covid data (whole US) and covid data (by state)
+anxiety <- read.csv(paste0(datadir, "anx_rate_ext.csv"), stringsAsFactors = FALSE)
+covid.us <- read.csv(paste0(datadir, "covid-data/weekly-us.csv"), stringsAsFactors = FALSE)
+covid <- read.csv(paste0(datadir, "covid-data/weekly-states.csv"), stringsAsFactors = FALSE)
+
+# Create logitudinal long form data frame
+paneldata <- data.frame(
+  State = covid$State,
+  Date = covid$EndofWeek,
+  CasesPerDay = covid$Cases,
+  LogCasesRatio = covid$LogRatio
+)
+for (i in 1:nrow(paneldata)) {
+  s <- paneldata[i, "State"]
+  d <- paneldata[i, "Date"]
+  
+  if (d %in% anxiety$date_end) {
+    paneldata[i,"anx"] <- anxiety[anxiety$date_end == d, s]
+  }
+}
+
+paneldata <- paneldata[paneldata$Date %in% anxiety$date_end,] # Only dates with an anxiety measurement
+```
+
+First, we have the output from the fixed effects model:
+```{r runfixedmodel}
+## read df
+paneldata <- read.csv(paste0(datadir, "panel-model-data.csv"))
+
+# Model: panel model by state with anxiety as response regressed on covid
+fit.states.fixed <- plm(anx ~ LogCasesRatio + lag(anx), paneldata, 
+                        index=c("State", "Date"), model="within")
+summary(fit.states.fixed)
+```
+
+We can see that both the lagged anxiety variable and LogCasesRatio are significant predictors. The value of the coefficient with $\mbox{COVID}_{s,t}$ shows that if new cases were to double from one week to the next, we expect our response anxiety odds to increase by `r round(fit.states.fixed$coefficients[1] * log(2), digits=4)`.
+
+The `plm` package also allows us to run a Hausman hypothesis test to see whether a fixed effects or random effects model is a better fit for our data.
+
+```{r runrandommodel}
+fit.states.random <- plm(anx ~ LogCasesRatio + lag(anx), paneldata, 
+                         index=c("State", "Date"), model="random")
+phtest(fit.states.fixed, fit.states.random)
+```
+
+The small p-value indicates that the null hypothesis of a random effects model should be rejected, and so our results from the fixed effects model are a better fit.
+
+
+## Associating Google Trends Data with Anxiety Surveys
+
+
+The search engine Google makes its search data available through Google Trends at https://trends.google.com/trends/.  Using the package `gtrendsr`, relative search popularity over time of a specified keyword can be obtained for a variety of regions.  Search popularity of the keywords "lockdown" and "covid" was gathered for the study period at US and state levels.  Figure \@ref(fig:gtrendus) shows the search popularity (0-100) of the word "covid" in the US from April 2020 to March 2021.
+
+
+```{r, getgtrends, }
+## start and ending time points
+start <- min(as.Date(anxiety$date_end))
+end <- max(as.Date(anxiety$date_end))
+
+## get interest over time for US
+covidint <- gtrends("covid", geo = "US", time = paste(start, end, sep = " "), onlyInterest = TRUE)[[1]]
+```
+
+
+```{r, gtrendus, fig.cap="Google Trends search popularity of "covid" over time.}
+ggplot(data = covidint, aes(x = as.Date(date), y = hits)) +
+    xlab("") +
+    ylab("Search Popularity") +
+    geom_line(alpha = .8)
+```
+
+
+## plot the trends together
+ggplot(data = anx_est_interp, aes(x = as.Date(date_end), y = US*100)) +
+    geom_line(color = "blue") +
+    geom_line(data = covidint, aes(x = as.Date(date), y = hits))
+
+## plot differences
+anx_diffs <- data.frame(date = anx_est_interp$date_end[-length(anx_est_interp$date_end)], 
+                        USdiffs = diff(anx_est_interp$US))
+                        
+covidint_diffs <- data.frame(date = covidint$date[-length(covidint$date)], 
+                             hitdiffs = log(covidint$hits[-length(covidint$hits)]) - log(covidint$hits[-1]))
+
+ggplot(data = anx_diffs, aes(x = as.Date(date), y = USdiffs)) +
+    geom_line(color = "blue") +
+    geom_line(data = covidint_diffs, aes(x = as.Date(date), y = hitdiffs))
+
+
 
 
 
