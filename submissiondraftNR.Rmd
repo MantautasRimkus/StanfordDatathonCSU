@@ -65,7 +65,7 @@ University administration is concerned with student mental health.  This study e
 
 The US Household Pulse Survey began in April 2020 as an attempt to monitor potential effects of the Covid pandemic on the US population.  The survey asked questions on education, employment, food security, health, and other household characteristics that may be susceptible to change during a health emergency.  There have been three phases to the survey, spanning from April 2020 to March 2021 with semi-weekly data available.  For this study, Table 2a: "Symptoms of Anxiety Experienced in the Last 7 Days, by Select Characteristics" was gathered for each week of the survey.  This table tracked the frequency that anxiety was experienced for the survey week, subjects responded with either "Not at all", "Several days", "More than half the days", or "Nearly every day".   Additional variables, such as age, sex, race, education, etc. were recorded, and the survey results were split into the 50 states as well as overall US .
 
-The anxiety survey data posed a few difficulties.  First, the survey "weeks" were at irregular intervals and an inconsistent number of days.  The irregularity of the intervals can be seen by some gaps in observations in Figure \@ref{fig:usanx}.  Second, the survey method used the Census Bureau's Master Address File to send emails and texts to very large samples.  This method had high non-response rates and is likely subject to considerable bias, although this is a common feature of any survey data.  Third, the age ranges recorded in this survey begin with "18-29".  To demonstrate that this age range is highly relevant to university administration, data was obtained from the National Center for Education Statistics. Figure \@ref(fig:univpop) shows that ~30\% of 18-29 year-olds in the United States are in higher education and that of those in higher education in the US, ~75\% are between the ages 18 and 29.  Thus the mental health characteristics of the age bracket 18-29 are will apply to the vast majority of university students.
+The anxiety survey data posed a few difficulties.  First, the survey "weeks" were at irregular intervals and an inconsistent number of days.  The irregularity of the intervals can be seen by some gaps in observations in Figure \@ref{fig:usanx}.  Second, the survey method used the Census Bureau's Master Address File to send emails and texts to very large samples.  This method had high non-response rates and is likely subject to considerable bias, although this is a common feature of any survey data.  Third, the age ranges recorded in this survey begin with "18-29".  To demonstrate that this age range is highly relevant to university administration, data was obtained from the National Center for Education Statistics. Figure \@ref(fig:univpop) shows that ~30\% of 18-29 year-olds in the United States are in higher education and that of those in higher education in the US, ~75\% are between the ages 18 and 29.  Thus the mental health characteristics of the age bracket 18-29 will apply to the vast majority of university students.
 
 
 ```{r, univpop, fig.cap = "The proportion of US higher education students who are between ages 18-29 (blue) and the proportion of US 18-29 year olds who are in higher education (red)."}
@@ -125,7 +125,7 @@ ggplot(filter(anx_est, State == state & Age == age),
 
 The Household Pulse Survey occurred in three phases, which can be seen in Figure \@ref(fig:usanx) as gaps in observed time points.  The anxiety ratio for 18-29 year-olds had an overall upwards trend for the year period, and the jumps in summer and winter may be related to spikes in Covid infections.  In November 2020 a large increase in anxiety can be easily related to the 2020 presidential election.  
 
-As described in the technical documentation (LINK), the weeks of the Household Pulse Survey do not represent strict intervals of 7 days. For example, "Week 1" refers to data that was collected between April 23rd and May 5th, 2020, (13 days), but Week 9 refers to data that was collected between June 25th and June 30th, 2020 (6 days). The time points $s_i$ will be defined as the end date of each Week collection. 
+As described in the technical documentation, the weeks of the Household Pulse Survey do not represent strict intervals of 7 days. For example, "Week 1" refers to data that was collected between April 23rd and May 5th, 2020, (13 days), but Week 9 refers to data that was collected between June 25th and June 30th, 2020 (6 days). The time points $s_i$ will be defined as the end date of each Week collection. 
 
 Notice that the $s_i$ are sparse and lead to unequal spaces between data points. To ensure univariate differences between time points, and be able to implement the models described later, interpolation was used with new time points $t_1,\ldots,t_{47}$ representing Sundays between May 05, 2020, and March 29, 2021. To calculate each $X_{t_i}$, where $s_{j-1}<t_i\leq s_{j}$ the formula  :
 
@@ -180,7 +180,7 @@ $$
 \mbox{anx}_{s,t} = \alpha_s + \beta_1 \mbox{anx}_{s,t-1} + \beta_2 \mbox{COVID}_{s,t} + \varepsilon_{s,t}
 $$
 
-This model allows for state-specific intercepts ($\alpha_s$), autocorrelation in anxiety within a state ($\beta_1$), and an effect of COVID cases on anxiety ($\beta_1$).
+This model allows for state-specific intercepts ($\alpha_s$), autocorrelation in anxiety within a state ($\beta_1$), and an effect of COVID cases on anxiety ($\beta_2$).
 
 Alternatively, we can have a random effect for the state-specific intercepts,
 \begin{align*}
@@ -236,7 +236,7 @@ fit.states.fixed <- plm(anx ~ LogCasesRatio + lag(anx), paneldata,
 summary(fit.states.fixed)
 ```
 
-We can see that both the lagged anxiety variable and LogCasesRatio are significant predictors. The value of the coefficient with $\mbox{COVID}_{s,t}$ shows that if new cases were to double from one week to the next, we expect our response anxiety odds to increase by `r round(fit.states.fixed$coefficients[1] * log(2), digits=4)`.
+We can see that both the lagged anxiety variable and LogCasesRatio are significant predictors. The value of the coefficient with $\mbox{COVID}_{s,t}$ shows that if new cases were to double from one week to the next, we expect our response anxiety ratio to increase by `r round(fit.states.fixed$coefficients[1] * log(2), digits=4)`.
 
 The `plm` package also allows us to run a Hausman hypothesis test to see whether a fixed effects or random effects model is a better fit for our data.
 
