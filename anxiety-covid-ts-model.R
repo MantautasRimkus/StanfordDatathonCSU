@@ -1,7 +1,6 @@
 # This file runs a time series model for anxiety of 18-29 year olds with
 # covid cases as a predictor
 
-dplyr
 library(plm)
 
 # Read in anxiety data, covid data (whole US) and covid data (by state)
@@ -21,7 +20,7 @@ search <- search %>%
   )
 
 # Join together data sources into data frame for linear model
-dates <- anx$date_end
+dates <- anxiety$date_end
 
 modeldata <- data.frame(
   Week = dates,
