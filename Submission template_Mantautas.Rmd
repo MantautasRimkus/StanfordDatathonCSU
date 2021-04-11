@@ -91,11 +91,15 @@ data_inter[,-1] %>%
    theme_bw()
 ```
 
-```{r}
-require(rmgarch)
 
+Description of Permutation Test. 
 
+As it was seen in the given map, there are some spatial-temporal trends between the difference in anxiety ratio and differences in Google Search trends for Covid. For the sake of this project, the joint significance of correlations of Colorado (where the team is based) and of California was tested using a permutation test. The statistics $T$ were calculated as 
 
-````
+$$
+T=corr^2_{\text{California}}+corr^2_{\text{Colorado}}
+$$
 
+The sampling distribution was derived using a permutation sampling, wherein each iteration of each states differences of anxiety ratio is assigned to randomized states differences in google trends and sampling distribution was obtained as $T_{1},\ldots, T_{1000}$. 
 
+We obtained $p=0.12$, thus the hypothesis of no significance cannot be rejected. Thus notice that taking into account the nature of data (noisy, interpolation), etc. One can argue that $p-value$ around significance $0.1$ that there is potential for more research in this area. 
