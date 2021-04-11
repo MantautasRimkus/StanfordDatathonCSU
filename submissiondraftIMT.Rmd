@@ -71,3 +71,57 @@ a_s &\sim N(0, \sigma^2_a)
 \end{align*}
 
 The `plm` package in `R` allows us to fit both of these models and perform a hypothesis test to determine which fits our data better.
+
+Because COVID cases can vary largely by state due to the size of the state, we were careful in how we constructed the $\mbox{COVID}_{s,t}$ covariate. We used the log ratio of new cases in sequential weeks as the COVID covariate:
+$$\mbox{COVID}_{s,t} = \log\left(\frac{\text{New cases in state $s$ and week $t$}}{\text{New cases in state $s$ and week $t-1$}}\right).$$
+
+This value is appealing for three reasons. First, it places all states on the same scale by only considering the ratio of subsequent weeks. Second, by using a ratio of new covid cases it handles the exponential growth nature of the pandemic. And third, it works well with an autoregressive model. A positive value means the pandemic is currently accelerating in a state, possibly resulting in increasing anxiety relative to week $t-1$. Similarly, a negative value means the pandemic is slowing down, possibly resulting in decreasing anxiety relative to week $t-1$.
+
+### Results
+
+```{r getmodeldata, include=FALSE}
+library(plm)
+
+# Read in anxiety data, covid data (whole US) and covid data (by state)
+anxiety <- read.csv("anx_rate_ext.csv")
+covid.us <- read.csv("covid-data/weekly-us.csv")
+covid <- read.csv("covid-data/weekly-states.csv")
+
+# Create logitudinal long form data frame
+paneldata <- data.frame(
+  State = covid$State,
+  Date = covid$EndofWeek,
+  CasesPerDay = covid$Cases,
+  LogCasesRatio = covid$LogRatio
+)
+for (i in 1:nrow(paneldata)) {
+  s <- paneldata[i, "State"]
+  d <- paneldata[i, "Date"]
+  
+  if (d %in% anxiety$date_end) {
+    paneldata[i,"anx"] <- anxiety[anxiety$date_end == d, s]
+  }
+}
+
+paneldata <- paneldata[paneldata$Date %in% anxiety$date_end,] # Only dates with an anxiety measurement
+```
+
+First, we have the output from the fixed effects model:
+```{r runfixedmodel}
+# Model: panel model by state with anxiety as response regressed on covid
+fit.states.fixed <- plm(anx ~ LogCasesRatio + lag(anx), paneldata, 
+                        index=c("State", "Date"), model="within")
+summary(fit.states.fixed)
+```
+
+We can see that both the lagged anxiety variable and LogCasesRatio are significant predictors. The value of the coefficient with $\mbox{COVID}_{s,t}$ shows that if new cases were to double from one week to the next, we expect our response anxiety odds to increase by `r round(fit.states.fixed$coefficients[1] * log(2), digits=4)`.
+
+The `plm` package also allows us to run a Hausman hypothesis test to see whether a fixed effects or random effects model is a better fit for our data.
+
+```{r runrandommodel}
+fit.states.random <- plm(anx ~ LogCasesRatio + lag(anx), paneldata, 
+                         index=c("State", "Date"), model="random")
+phtest(fit.states.fixed, fit.states.random)
+```
+
+The small p-value indicates that the null hypothesis of a random effects model should be rejected, and so our results from the fixed effects model are a better fit.
