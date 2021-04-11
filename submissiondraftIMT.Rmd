@@ -1,0 +1,73 @@
+---
+header-includes:
+   - \usepackage{bm}
+   - \usepackage{float}
+   - \floatplacement{figure}{H}
+   - \usepackage{booktabs}
+   - \usepackage{sectsty} \sectionfont{\centering \emph}
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+ 
+---
+\newcommand\btheta{\mbox{\boldmath${\theta}$}}
+
+```{r setup, include=FALSE}
+# Use echo = FALSE for Answer Key without R code, 
+# echo = TRUE for complete solutions.
+knitr::opts_chunk$set(echo = TRUE)
+library(plyr)
+library("tidyverse")
+library("xtable")
+library("Rcpp")
+library("plyr")
+library("knitr")
+```
+
+Team No: 202
+
+Track No.: 2. 
+
+# Our name of the project
+
+Link to GitHub Repository: https://github.com/MantautasRimkus/StanfordDatathonCSU
+
+
+### Plan
+
+* Write introduction: About Covid, about anxiety, about how 19-28 more(no more?) prone to it. Write that our analysis shows that a lot of 18-29 are in the college. 
+
+* Write introduction: calculate (using historical data) how many 18-29 is in college. Maybe prediction for 2020. 
+* Describe data sources used in this research:
+   - Anxiety
+   - Covid
+   - Google
+
+* Overview trends in anxiety data (functional analysis)
+
+* Panel modelling 
+
+* Discussion/results. 
+
+## Predicting Anxiety from COVID Cases Using a Panel Model
+
+We are searching for a way for school administrators to anticipate increased anxiety among their students. In 2020 and today, anecdotally, COVID is a significant source of anxiety. We used a panel model to find the predictiveness of covid cases on anxiety in 18-29 year olds.
+
+Panel models are used for regression when the response and predictor variables are longitudinal. In this case, we treat US states as entities and have longitudinal values for both anxiety and new COVID cases.
+
+For states $s=1,\dots, 50$ and time periods $t=1,\dots,T$, we use the model
+
+$$
+\mbox{anx}_{s,t} = \alpha_s + \beta_1 \mbox{anx}_{s,t-1} + \beta_2 \mbox{COVID}_{s,t} + \varepsilon_{s,t}
+$$
+
+This model allows for state-specific intercepts ($\alpha_s$), autocorrelation in anxiety within a state ($\beta_1$), and an effect of COVID cases on anxiety ($\beta_1$).
+
+Alternatively, we can have a random effect for the state-specific intercepts,
+\begin{align*}
+\mbox{anx}_{s,t} &= \alpha + a_s + \beta_1 \mbox{anx}_{s,t-1} + \beta_2 \mbox{COVID}_{s,t} + \varepsilon_{s,t} \\
+a_s &\sim N(0, \sigma^2_a)
+\end{align*}
+
+The `plm` package in `R` allows us to fit both of these models and perform a hypothesis test to determine which fits our data better.
